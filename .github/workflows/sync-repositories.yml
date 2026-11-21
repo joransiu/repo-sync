@@ -1,0 +1,90 @@
+
+name: Sync Forks with Upstream
+
+on:
+  schedule:
+    # Daily at 06:17 UTC
+    - cron: "17 6 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-sync
+  cancel-in-progress: false
+
+jobs:
+  load-repositories:
+    name: Load repository configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.config.outputs.matrix }}
+
+    steps:
+      - name: Checkout configuration
+        uses: actions/checkout@v4
+
+      - name: Validate and load repositories
+        id: config
+        run: |
+          set -euo pipefail
+
+          jq -e '
+            type == "array" and length > 0 and
+            all(.[];
+              (.upstream | strings | length > 0) and
+              (.upstream_branch | strings | length > 0) and
+              (.fork | strings | length > 0) and
+              (.fork_branch | strings | length > 0)
+            )
+          ' config/repos.json
+
+          echo "matrix=$(jq -c . config/repos.json)" >> "$GITHUB_OUTPUT"
+
+  sync:
+    name: Sync ${{ matrix.fork }}
+    needs: load-repositories
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load-repositories.outputs.matrix) }}
+
+    steps:
+      - name: Synchronize repository
+        env:
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          UPSTREAM: ${{ matrix.upstream }}
+          UPSTREAM_BRANCH: ${{ matrix.upstream_branch }}
+          FORK: ${{ matrix.fork }}
+          FORK_BRANCH: ${{ matrix.fork_branch }}
+
+        run: |
+          set -euo pipefail
+
+          echo "======================================"
+          echo "Upstream: $UPSTREAM:$UPSTREAM_BRANCH"
+          echo "Fork:     $FORK:$FORK_BRANCH"
+          echo "======================================"
+
+          git init --quiet sync-repo
+          cd sync-repo
+
+          git remote add upstream \
+            "https://github.com/${UPSTREAM}.git"
+
+          git fetch --no-tags upstream \
+            "+refs/heads/${UPSTREAM_BRANCH}:refs/remotes/upstream/${UPSTREAM_BRANCH}"
+
+          AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$SYNC_TOKEN" | base64 -w0)"
+
+          git -c http.extraheader="$AUTH_HEADER" push \
+            --force \
+            "https://github.com/${FORK}.git" \
+            "refs/remotes/upstream/${UPSTREAM_BRANCH}:refs/heads/${FORK_BRANCH}"
+
+          echo "Successfully synchronized $FORK"
