@@ -1,0 +1,39 @@
+
+[
+  {
+    "upstream": "eclipse-openj9/openj9",
+    "upstream_branch": "main",
+    "fork": "joransiu/openj9",
+    "fork_branch": "main"
+  },
+  {
+    "upstream": "eclipse-openj9/openj9-docs",
+    "upstream_branch": "main",
+    "fork": "joransiu/openj9-docs",
+    "fork_branch": "main"
+  },
+  {
+    "upstream": "ibmruntimes/openj9-openjdk-jdk21",
+    "upstream_branch": "openj9",
+    "fork": "joransiu/openj9-openjdk-jdk21",
+    "fork_branch": "openj9"
+  },
+  {
+    "upstream": "ibmruntimes/openj9-openjdk-jdk17",
+    "upstream_branch": "openj9",
+    "fork": "joransiu/openj9-openjdk-jdk17",
+    "fork_branch": "openj9"
+  },
+  {
+    "upstream": "ibmruntimes/openj9-openjdk-jdk11",
+    "upstream_branch": "openj9",
+    "fork": "joransiu/openj9-openjdk-jdk11",
+    "fork_branch": "openj9"
+  },
+  {
+    "upstream": "eclipse-omr/omr",
+    "upstream_branch": "master",
+    "fork": "joransiu/omr",
+    "fork_branch": "master"
+  }
+]
