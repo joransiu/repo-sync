@@ -17,7 +17,7 @@
     "upstream_branch": "master",
     "fork": "joransiu/omr",
     "fork_branch": "master"
-  }
+  },
   {
     "upstream": "ibmruntimes/openj9-openjdk-jdk",
     "upstream_branch": "openj9",
@@ -53,5 +53,5 @@
     "upstream_branch": "openj9",
     "fork": "joransiu/openj9-openjdk-jdk8",
     "fork_branch": "openj9"
-  },
+  }
 ]
